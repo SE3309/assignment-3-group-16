@@ -1,4 +1,23 @@
-SELECT patient_id, first_name, last_name, date_of_birth FROM Patient;
+SELECT p.patient_id, p.first_name, p.last_name, p.date_of_birth, a.appointment_date, a.reason_for_visit
+FROM Patient p
+LEFT JOIN Appointment a
+ON p.patient_id = a.patient_id
+WHERE 
+    a.appointment_date = (
+        SELECT MAX(appointment_date)
+        FROM Appointment
+        WHERE patient_id = p.patient_id
+    )
+UNION
+SELECT p.patient_id, p.first_name, p.last_name, p.date_of_birth, NULL AS appointment_date, NULL AS reason_for_visit
+FROM Patient p
+WHERE 
+    NOT EXISTS (
+        SELECT 1
+        FROM Appointment a
+        WHERE a.patient_id = p.patient_id
+    );
+
 
 SELECT p.first_name AS patient_name, d.first_name AS doctor_name, a.appointment_date, a.reason_for_visit
 FROM Appointment a
